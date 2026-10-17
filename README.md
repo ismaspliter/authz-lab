@@ -64,7 +64,7 @@ Todo cabe en el plan gratuito de Cloudflare Workers.
 ## Tests
 
 ```bash
-node --test test/
+node --test test/*.test.ts
 ```
 
 Requiere Node 22.18 o superior (ejecuta TypeScript directamente).
