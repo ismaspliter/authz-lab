@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Authz Lab · Autorización de grano fino</title>
+<meta name="description" content="Laboratorio de autorización: inicia sesión con distintos usuarios y descubre qué pueden hacer y por qué, regla a regla.">
+<meta property="og:title" content="Authz Lab · Autorización de grano fino">
+<meta property="og:description" content="Inicia sesión, intenta acciones sobre usuarios, roles, robots y agentes de IA, y mira por qué te dejan o no.">
+<meta property="og:image" content="https://spliter.dev/brand/avatar-400.png">
+<link rel="icon" href="https://spliter.dev/brand/favicon.ico">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="https://spliter.dev"><img src="https://spliter.dev/brand/avatar-64.png" width="32" height="32" alt=""><span>spliter<span class="dot">.</span>dev</span></a>
+  <nav class="top-links" aria-label="Laboratorios"><a href="https://lab.spliter.dev">IAM Lab</a><span class="tag">Authz Lab</span></nav>
+</header>
+
+<main class="wrap">
+  <div id="error" class="banner" hidden></div>
+
+  <!-- Sin sesión -->
+  <section id="welcome" hidden>
+    <div class="hero">
+      <h1>¿Quién puede hacer qué, <em>y por qué</em>?</h1>
+      <p>Inicia sesión en el <a href="https://lab.spliter.dev">IAM Lab</a> con uno de los usuarios de una empresa ficticia. Después intenta administrar usuarios, roles, aplicaciones, robots y agentes de IA, y mira cómo seis reglas independientes deciden si puedes.</p>
+      <div class="actions"><a class="btn btn-primary" href="/login">Iniciar sesión con IAM Lab</a></div>
+      <p class="hint">En la pantalla de inicio de sesión podrás elegir el usuario y si usas segundo factor (MFA). Prueba varias combinaciones.</p>
+    </div>
+    <h2 class="section-title">Las seis dimensiones</h2>
+    <div class="dims-grid">
+      <div class="dim-card"><strong>Capacidad</strong><span>¿Alguno de tus roles incluye la acción?</span></div>
+      <div class="dim-card"><strong>Ámbito</strong><span>¿El recurso está en tu alcance: todo, tu equipo o lo tuyo?</span></div>
+      <div class="dim-card"><strong>Relación</strong><span>¿Tienes el vínculo que pide: propietario, responsable…?</span></div>
+      <div class="dim-card"><strong>Límite</strong><span>¿Estás dentro de tus topes de privilegio y riesgo?</span></div>
+      <div class="dim-card"><strong>Contexto</strong><span>¿Tu sesión cumple las condiciones: MFA, dispositivo…?</span></div>
+      <div class="dim-card"><strong>Prohibición</strong><span>¿Hay algo que lo impida siempre? Gana a todo lo demás.</span></div>
+    </div>
+    <p class="hint">Son ortogonales: cada una responde a una pregunta distinta y se gestiona por separado. Así no hace falta un rol para cada combinación.</p>
+  </section>
+
+  <!-- Con sesión -->
+  <section id="app" hidden>
+    <div class="identity" id="identity"></div>
+
+    <div class="layout">
+      <div class="resources" id="resources"></div>
+      <aside class="decision" id="decision" aria-live="polite">
+        <p class="label">Decisión</p>
+        <div id="decision-body"><p class="muted">Pulsa cualquier acción de la izquierda para ver qué reglas se evalúan y por qué te dejan o no.</p></div>
+      </aside>
+    </div>
+
+    <details class="rules" id="rules">
+      <summary>Ver todas las reglas</summary>
+      <div id="rules-body"></div>
+    </details>
+  </section>
+</main>
+
+<footer class="foot">Relacionado con el <a href="https://lab.spliter.dev">IAM Lab</a> · Hecho por <a href="https://spliter.dev">spliter.dev</a></footer>
+<script src="/app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  // Authz Lab: motor de autorización de laboratorio + web estática en un único Worker.
+  // El nombre debe coincidir con el del Worker en el panel de Cloudflare.
+  "name": "authz-lab",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-17",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  // Conexión interna con el IAM Lab (gratuita): el login y la validación de tokens
+  // van de Worker a Worker sin salir a Internet.
+  "services": [{ "binding": "IAM", "service": "iam-lab" }],
+  "vars": { "IAM_ISSUER": "https://lab.spliter.dev" }
+}
