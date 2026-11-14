@@ -4,6 +4,8 @@ Laboratorio de **autorización de grano fino**. Inicias sesión en el [IAM Lab](
 
 **→ [authz.spliter.dev](https://authz.spliter.dev)**
 
+> **Cómo está hecho:** programado en pareja con IA ([Claude Code](https://claude.com/claude-code)). Qué enseña el lab, cómo se estructura y las decisiones de seguridad son mías; abajo explico las principales.
+
 ## La idea: reglas ortogonales
 
 En lugar de un rol para cada combinación (`aprobador-pagos-hasta-10k-con-mfa`…), cada decisión se divide en seis preguntas independientes:
@@ -20,6 +22,14 @@ En lugar de un rol para cada combinación (`aprobador-pagos-hasta-10k-con-mfa`�
 `permitido = capacidad ∧ ámbito ∧ relación ∧ límite ∧ contexto ∧ ¬prohibición`
 
 Cada dimensión se gestiona por separado y no conoce a las demás. Toda decisión devuelve la traza completa.
+
+## Decisiones
+
+- **Dimensiones ortogonales en lugar de roles combinados.** Los roles que mezclan acción, alcance, límites y contexto explotan en número y nadie sabe qué conceden. Separarlos en seis preguntas permite cambiar una sin tocar las demás.
+- **Las prohibiciones ganan siempre.** Separación de funciones o "ningún agente de IA con permisos críticos" no deben depender de que nadie se olvide de quitar un permiso, así que se evalúan aparte y anulan cualquier concesión.
+- **Toda decisión explica su porqué.** El motor devuelve la traza de las seis dimensiones, no solo un sí o un no. Una autorización que no se puede explicar no se puede auditar.
+- **Robots y agentes de IA como identidades de primera clase.** Hoy buena parte de los accesos no son de personas, y es donde más falla el control. Por eso tienen dueño, ámbito y límites como cualquier usuario.
+- **Identidad delegada al IAM Lab.** La autenticación se resuelve en otro sitio (OIDC) y aquí solo se decide qué puedes hacer. Esa separación es la misma que en un sistema real, y conecta los dos labs.
 
 ## Escenario
 
