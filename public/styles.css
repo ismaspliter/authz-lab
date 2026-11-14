@@ -148,3 +148,67 @@ em { font-style: normal; color: var(--accent); }
 
 .foot { text-align: center; color: var(--muted); font-family: var(--mono); font-size: 12px; padding: 24px 16px 40px; }
 @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
+
+/* ---------- tráfico en vivo ---------- */
+.flow { border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 18px; background: var(--bg); }
+.flow-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.flow-head .label { margin: 0; }
+.flow-legend { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.flow-legend i { width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; background: var(--accent); }
+.flow-legend i.ok { background: var(--ok); }
+.flow-legend i.bad { background: var(--bad); }
+.flow-lane { position: relative; display: flex; align-items: center; padding: 30px 0; }
+.flow-node { flex: 0 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0; padding: 6px 8px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); position: relative; z-index: 1; transition: border-color 0.2s, box-shadow 0.2s; }
+.flow-node b { font-weight: 500; font-size: 13px; line-height: 1.2; white-space: nowrap; }
+.flow-node small { font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.3; }
+.flow-node.hit { border-color: var(--accent); }
+.flow-node.busy { border-color: var(--accent); animation: flow-halo 1s ease-out infinite; }
+@keyframes flow-halo { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } to { box-shadow: 0 0 0 10px transparent; } }
+.flow-wire { flex: 1; min-width: 12px; height: 0; border-top: 2px dashed var(--line); }
+.packet { position: absolute; left: 0; top: 0; z-index: 2; height: 26px; padding: 0 10px; border-radius: 13px; display: inline-flex; align-items: center; white-space: nowrap; font-family: var(--mono); font-size: 11px; font-weight: 500; background: var(--accent); color: var(--accent-ink); box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.5); pointer-events: none; will-change: transform, opacity; }
+.packet.ok { background: var(--ok); color: var(--ok-bg); }
+.packet.bad { background: var(--bad); color: var(--bad-bg); }
+
+.flow-engine { display: flex; flex-direction: column; gap: 6px; }
+.flow-engine-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.flow-gates { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+.flow { container-type: inline-size; }
+@container (min-width: 380px) { .flow-gates { grid-template-columns: repeat(3, 1fr); } }
+.gate { display: flex; align-items: center; gap: 5px; font-size: 12px; padding: 3px 6px; border-radius: 8px; border: 1px solid var(--line); color: var(--muted); transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+.gate i { flex: none; width: 14px; height: 14px; border-radius: 4px; display: grid; place-items: center; font-style: normal; font-size: 10px; font-weight: 700; background: var(--line); }
+.gate.scan { border-color: var(--accent); color: var(--ink); }
+.gate.ok { color: var(--ok); border-color: var(--ok-bg); background: var(--ok-bg); }
+.gate.ok i { background: var(--ok); color: var(--ok-bg); }
+.gate.fallo { color: var(--bad); border-color: var(--bad); background: var(--bad-bg); }
+.gate.fallo i { background: var(--bad); color: var(--bad-bg); }
+.gate.no_aplica { opacity: 0.6; }
+
+.flow-log { list-style: none; margin: 10px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--code-bg); color: var(--code-ink); font-family: var(--mono); font-size: 12px; line-height: 1.6; min-height: 3.4em; }
+.flow-log:empty::before { content: "esperando una acción…"; color: var(--muted); }
+.flow-log li { overflow-wrap: anywhere; }
+.flow-log b { font-weight: 500; color: var(--k); }
+.flow-log span { color: #A08F8C; margin-left: 6px; }
+.flow-log li.ok { color: #8FD1AE; }
+.flow-log li.bad { color: #F2A39B; }
+
+.verdict.pending { background: var(--line); color: var(--muted); }
+.verdict.pending strong { animation: flow-blink 1s ease-in-out infinite alternate; }
+@keyframes flow-blink { from { opacity: 1; } to { opacity: 0.45; } }
+.enter { animation: flow-enter 0.32s ease-out both; animation-delay: calc(var(--i, 0) * 55ms); }
+@keyframes flow-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.act.changed { animation: flow-changed 1.2s ease-out; }
+@keyframes flow-changed { 0% { transform: scale(1); box-shadow: 0 0 0 0 var(--accent); } 25% { transform: scale(1.08); } 100% { transform: scale(1); box-shadow: 0 0 0 8px transparent; } }
+
+/* portada */
+.demo { display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch; }
+.demo-q { flex: 1 1 280px; background: var(--card); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+.demo-who { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+.demo-who strong { font-weight: 700; }
+.demo-verdict { min-height: 76px; }
+.demo-q .actions { margin-top: auto; padding-top: 12px; }
+#demo-flow { flex: 1 1 340px; margin: 0; background: var(--card); box-shadow: var(--shadow); border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-node.busy, .verdict.pending strong, .enter, .act.changed { animation: none; }
+  .gate, .flow-node { transition: none; }
+}
