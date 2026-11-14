@@ -28,6 +28,15 @@
       <div class="actions"><a class="btn btn-primary" href="/login">Iniciar sesión con IAM Lab</a></div>
       <p class="hint">En la pantalla de inicio de sesión podrás elegir el usuario y si usas segundo factor (MFA). Prueba varias combinaciones.</p>
     </div>
+    <h2 class="section-title">Así decide, en directo</h2>
+    <div class="demo" id="demo" hidden>
+      <div class="demo-q">
+        <p class="demo-who" id="demo-q" aria-live="polite"></p>
+        <div class="demo-verdict" id="demo-verdict"></div>
+        <div class="actions"><button class="btn" id="demo-next" type="button">Siguiente ejemplo</button></div>
+      </div>
+      <div id="demo-flow"></div>
+    </div>
     <h2 class="section-title">Las seis dimensiones</h2>
     <div class="dims-grid">
       <div class="dim-card"><strong>Capacidad</strong><span>¿Alguno de tus roles incluye la acción?</span></div>
@@ -47,6 +56,7 @@
     <div class="layout">
       <div class="resources" id="resources"></div>
       <aside class="decision" id="decision" aria-live="polite">
+        <div id="flow"></div>
         <p class="label">Decisión</p>
         <div id="decision-body"><p class="muted">Pulsa cualquier acción de la izquierda para ver qué reglas se evalúan y por qué te dejan o no.</p></div>
       </aside>

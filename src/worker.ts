@@ -70,8 +70,18 @@ function iamFetch(env: Env, path: string, init?: RequestInit): Promise<Response>
 
 let jwksCache: { key: CryptoKey; kid: string; at: number } | null = null;
 
-async function signingKey(env: Env): Promise<{ key: CryptoKey; kid: string }> {
-  if (jwksCache && Date.now() - jwksCache.at < 10 * 60_000) return jwksCache;
+// Qué pasó al validar la sesión en esta petición. La interfaz lo recibe en la cabecera
+// Server-Timing y lo usa para animar el recorrido real (p. ej. si hubo que ir al IAM Lab).
+export interface Trace {
+  jwks?: "cache" | "iam";
+}
+
+async function signingKey(env: Env, trace?: Trace): Promise<{ key: CryptoKey; kid: string }> {
+  if (jwksCache && Date.now() - jwksCache.at < 10 * 60_000) {
+    if (trace) trace.jwks = "cache";
+    return jwksCache;
+  }
+  if (trace) trace.jwks = "iam";
   const { keys } = (await (await iamFetch(env, "/as/jwks")).json()) as { keys: JsonWebKey[] & { kid?: string }[] };
   const k = keys[0] as JsonWebKey & { kid: string };
   const key = await crypto.subtle.importKey("jwk", { kty: k.kty, crv: k.crv, x: k.x, y: k.y }, { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
@@ -92,7 +102,7 @@ export interface IdClaims {
   email?: string;
 }
 
-async function verifyIdToken(env: Env, token: string, nonce?: string): Promise<IdClaims | null> {
+async function verifyIdToken(env: Env, token: string, nonce?: string, trace?: Trace): Promise<IdClaims | null> {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   let header: { alg?: string };
@@ -104,7 +114,7 @@ async function verifyIdToken(env: Env, token: string, nonce?: string): Promise<I
     return null;
   }
   if (header.alg !== "ES256") return null;
-  const { key } = await signingKey(env);
+  const { key } = await signingKey(env, trace);
   const ok = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, key, b64urlDecode(parts[2]), enc.encode(`${parts[0]}.${parts[1]}`));
   if (!ok) {
     jwksCache = null; // la clave pudo rotar: se recargará en la próxima petición
@@ -115,9 +125,9 @@ async function verifyIdToken(env: Env, token: string, nonce?: string): Promise<I
   return claims;
 }
 
-async function session(req: Request, env: Env): Promise<IdClaims | null> {
+async function session(req: Request, env: Env, trace?: Trace): Promise<IdClaims | null> {
   const token = readCookie(req, SESSION);
-  return token ? verifyIdToken(env, token) : null;
+  return token ? verifyIdToken(env, token, undefined, trace) : null;
 }
 
 // ---------- flujo de inicio de sesión ----------
@@ -220,8 +230,43 @@ function catalog(principal: Principal | undefined, claims: IdClaims, managedDevi
   };
 }
 
+// Casos de ejemplo para la portada (sin sesión). Los decide el motor real, así que la
+// animación de bienvenida nunca se desincroniza de las reglas.
+const DEMO: { who: string; resource: string; action: string; params: AuthzRequest["params"]; mfa: boolean }[] = [
+  { who: "usr_bruno", resource: "req_carla_lead", action: "aprobar", params: {}, mfa: true },
+  { who: "usr_bruno", resource: "req_bruno_admin", action: "aprobar", params: {}, mfa: true },
+  { who: "usr_carla", resource: "bot_conciliacion", action: "rotar_credenciales", params: {}, mfa: false },
+  { who: "usr_bruno", resource: "usr_carla", action: "asignar_rol", params: { role: "iam_admin" }, mfa: true },
+  { who: "usr_ana", resource: "agt_soporte", action: "conceder_permisos", params: { risk: "crítico" }, mfa: true },
+];
+
+function demo() {
+  return DEMO.flatMap((c) => {
+    const principal = principalBySub(c.who);
+    const resource = resourceById(c.resource);
+    const action = resource && ACTIONS[resource.kind].find((a) => a.id === c.action);
+    if (!principal || !resource || !action) return [];
+    const d = decide({ principal, resource, action: c.action, params: c.params, context: { mfa: c.mfa, managedDevice: true } });
+    const extra = c.params.role ? ` (${ROLES.find((x) => x.id === c.params.role)?.name})` : c.params.risk ? ` (riesgo ${c.params.risk})` : "";
+    return [{ who: principal.name, action: action.label + extra, resource: resource.name, mfa: c.mfa, ...d }];
+  });
+}
+
+function serverTiming(trace: Trace): string {
+  return trace.jwks ? `jwks;desc="${trace.jwks}"` : "";
+}
+
 async function api(req: Request, url: URL, env: Env): Promise<Response> {
-  const claims = await session(req, env);
+  const trace: Trace = {};
+  const res = await apiInner(req, url, env, trace);
+  const st = serverTiming(trace);
+  if (st) res.headers.set("server-timing", st);
+  return res;
+}
+
+async function apiInner(req: Request, url: URL, env: Env, trace: Trace): Promise<Response> {
+  if (url.pathname === "/api/demo") return json({ cases: demo() });
+  const claims = await session(req, env, trace);
   if (!claims) return json({ error: "no_session" }, 401);
   const principal = principalBySub(claims.sub);
   const managedDevice = url.searchParams.get("device") === "1";

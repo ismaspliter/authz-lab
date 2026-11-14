@@ -51,6 +51,7 @@ navegador ──► authz-lab (Worker)
 - **Login**: Authorization Code + PKCE, `state` y `nonce` en una cookie HttpOnly temporal.
 - **Sesión**: el propio `id_token` en una cookie HttpOnly, validado (firma ES256, emisor, audiencia y caducidad) en cada petición. Sin base de datos ni secretos propios.
 - **MFA**: se lee del claim `amr` del `id_token`; el dispositivo gestionado se simula con un interruptor.
+- **Tráfico en vivo**: cada clic dibuja la petición real mientras ocurre (navegador → Worker → motor → respuesta), con las seis dimensiones encendiéndose según la traza que devuelve el servidor y un registro con el tiempo medido. El Worker añade la cabecera `Server-Timing: jwks;desc="cache|iam"`, así que el salto al IAM Lab solo se anima cuando de verdad se pidió la clave por el service binding. La portada reproduce casos de ejemplo decididos por el motor real (`/api/demo`). Sin dependencias ni build (Web Animations API) y respetando `prefers-reduced-motion`.
 - **Motor**: TypeScript sin dependencias. Las reglas están en `src/policy.ts` y los datos en `src/model.ts`.
 
 Todo cabe en el plan gratuito de Cloudflare Workers.
